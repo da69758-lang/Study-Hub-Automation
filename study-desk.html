@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Study Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #eef2f7;
+    --grid: #d9e1ec;
+    --ink: #15223b;
+    --ink-soft: #55627a;
+    --card: #fbfcfe;
+    --line: #c9d3e1;
+    --marker: #ffe45c;
+    --marker-ink: #15223b;
+    --margin: #e4572e;
+    --code-bg: #e4eaf3;
+    --ui: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --read: "Newsreader", Georgia, "Times New Roman", serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0f1a2e;
+      --grid: #1a2944;
+      --ink: #e8eef8;
+      --ink-soft: #93a1ba;
+      --card: #16233d;
+      --line: #2b3b5a;
+      --code-bg: #0b1424;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0f1a2e;
+    --grid: #1a2944;
+    --ink: #e8eef8;
+    --ink-soft: #93a1ba;
+    --card: #16233d;
+    --line: #2b3b5a;
+    --code-bg: #0b1424;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: var(--ink);
+    font-family: var(--ui);
+    display: flex;
+    flex-direction: column;
+  }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--margin); outline-offset: 2px; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px clamp(16px, 4vw, 32px);
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(6px);
+  }
+  .brand { font-family: var(--read); font-size: 1.4rem; font-weight: 500; letter-spacing: -0.01em; }
+  .brand mark { background: var(--marker); color: var(--marker-ink); padding: 0 .3em; border-radius: 2px; }
+  .tools { display: flex; gap: 8px; }
+  .btn {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 12px; font-size: .875rem; font-weight: 500;
+  }
+  .btn:hover { border-color: var(--ink-soft); }
+
+  main { flex: 1; overflow-y: auto; scroll-behavior: smooth; }
+  .page { max-width: 720px; margin: 0 auto; padding: 28px clamp(16px, 4vw, 24px) 24px; }
+
+  .empty { padding: 8vh 0 0; }
+  .empty h1 { font-family: var(--read); font-weight: 400; font-size: clamp(2rem, 6vw, 3rem); line-height: 1.1; margin: 0 0 12px; letter-spacing: -0.02em; }
+  .empty p { color: var(--ink-soft); margin: 0 0 24px; max-width: 46ch; line-height: 1.5; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+    padding: 8px 14px; font-size: .9rem;
+  }
+  .chip:hover { background: var(--marker); color: var(--marker-ink); border-color: var(--marker); }
+
+  .msg { margin: 0 0 22px; display: flex; }
+  .msg.user { justify-content: flex-end; }
+  .msg.user .bubble {
+    background: var(--marker); color: var(--marker-ink);
+    padding: 9px 14px; border-radius: 10px 10px 2px 10px;
+    max-width: 80%; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.45;
+  }
+  .msg.bot .bubble {
+    border-left: 2px solid var(--margin);
+    padding: 2px 0 2px 16px;
+    font-family: var(--read); font-size: 1.12rem; line-height: 1.6;
+    max-width: 100%; min-width: 0; overflow-wrap: anywhere;
+  }
+  .msg.err .bubble { border-left-color: var(--ink-soft); font-family: var(--ui); font-size: .95rem; color: var(--ink-soft); }
+  .bubble > :first-child { margin-top: 0; }
+  .bubble > :last-child { margin-bottom: 0; }
+  .bubble p { margin: 0 0 .8em; }
+  .bubble ul, .bubble ol { padding-left: 1.3em; margin: 0 0 .8em; }
+  .bubble li { margin: .25em 0; }
+  .bubble h1, .bubble h2, .bubble h3 { font-family: var(--ui); font-size: 1.05rem; margin: 1.1em 0 .4em; }
+  .bubble code { background: var(--code-bg); padding: .1em .35em; border-radius: 4px; font-size: .88em; font-family: ui-monospace, Consolas, monospace; }
+  .codewrap { position: relative; margin: 0 0 .9em; }
+  .codewrap pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px; overflow-x: auto; margin: 0; }
+  .codewrap pre code { background: none; padding: 0; font-size: .85rem; line-height: 1.5; }
+  .copy { position: absolute; top: 8px; right: 8px; font-family: var(--ui); font-size: .75rem; padding: 3px 8px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; }
+  .bubble table { border-collapse: collapse; display: block; overflow-x: auto; margin: 0 0 .9em; }
+  .bubble th, .bubble td { border: 1px solid var(--line); padding: 5px 10px; font-size: .95rem; }
+
+  .typing { display: inline-flex; gap: 5px; padding: 8px 0 8px 16px; border-left: 2px solid var(--margin); }
+  .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-soft); animation: bob 1s infinite ease-in-out; }
+  .typing i:nth-child(2) { animation-delay: .15s; }
+  .typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes bob { 0%, 80%, 100% { opacity: .3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+  @media (prefers-reduced-motion: reduce) { .typing i { animation: none; opacity: .7; } main { scroll-behavior: auto; } }
+
+  .composer-wrap { border-top: 1px solid var(--line); background: color-mix(in srgb, var(--paper) 92%, transparent); padding: 14px clamp(16px, 4vw, 24px) 18px; }
+  .composer { max-width: 720px; margin: 0 auto; display: flex; gap: 10px; align-items: flex-end; }
+  textarea {
+    flex: 1; resize: none; max-height: 160px; min-height: 46px;
+    background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; font: inherit; font-size: 1rem; line-height: 1.4;
+  }
+  textarea::placeholder { color: var(--ink-soft); }
+  .send { background: var(--ink); color: var(--paper); border: 0; border-radius: 10px; padding: 0 18px; height: 46px; font-weight: 600; }
+  .send:disabled { opacity: .45; cursor: not-allowed; }
+  .hint { max-width: 720px; margin: 6px auto 0; font-size: .75rem; color: var(--ink-soft); }
+
+  dialog { background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 22px; width: min(480px, 92vw); }
+  dialog::backdrop { background: rgba(8, 14, 28, .55); }
+  dialog h2 { font-family: var(--read); font-weight: 500; font-size: 1.4rem; margin: 0 0 6px; }
+  dialog p { margin: 0 0 14px; color: var(--ink-soft); font-size: .9rem; line-height: 1.45; }
+  dialog input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: inherit; }
+  dialog .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  dialog .primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><mark>Study</mark> Desk</div>
+  <div class="tools">
+    <button class="btn" id="themeBtn" type="button">Theme</button>
+    <button class="btn" id="newBtn" type="button">New chat</button>
+    <button class="btn" id="setBtn" type="button">Connection</button>
+  </div>
+</header>
+
+<main id="scroller">
+  <div class="page" id="log">
+    <section class="empty" id="empty">
+      <h1>What are we studying today?</h1>
+      <p>Ask anything and get a clear explanation with examples. I remember the conversation, so you can keep asking follow-ups.</p>
+      <div class="chips" id="chips">
+        <button class="chip" type="button">Explain recursion with a simple example</button>
+        <button class="chip" type="button">Quiz me on photosynthesis</button>
+        <button class="chip" type="button">Make a 3-day study plan for calculus</button>
+        <button class="chip" type="button">Summarize the French Revolution in 5 lines</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="composer-wrap">
+  <div class="composer">
+    <textarea id="input" rows="1" placeholder="Type your question" aria-label="Your message"></textarea>
+    <button class="send" id="sendBtn" type="button">Send</button>
+  </div>
+  <div class="hint">Enter to send, Shift+Enter for a new line.</div>
+</div>
+
+<dialog id="dlg">
+  <h2>Connect to n8n</h2>
+  <p>Paste the <strong>Production URL</strong> from your Chat Trigger node. It looks like http://localhost:5678/webhook/…/chat</p>
+  <input id="urlInput" type="url" placeholder="http://localhost:5678/webhook/.../chat" aria-label="n8n chat webhook URL">
+  <div class="row">
+    <button class="btn" id="cancelBtn" type="button">Cancel</button>
+    <button class="btn primary" id="saveBtn" type="button">Save connection</button>
+  </div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+<script>
+(function () {
+  var URL_KEY = "studydesk.url", SID_KEY = "studydesk.sid", THEME_KEY = "studydesk.theme";
+  var $ = function (id) { return document.getElementById(id); };
+  var log = $("log"), scroller = $("scroller"), input = $("input"), sendBtn = $("sendBtn"), dlg = $("dlg");
+  var busy = false;
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  function newSession() {
+    var id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+    store(SID_KEY, id);
+    return id;
+  }
+  var sessionId = store(SID_KEY) || newSession();
+
+  /* theme */
+  var savedTheme = store(THEME_KEY);
+  if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+  $("themeBtn").addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    if (!cur) cur = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    var next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    store(THEME_KEY, next);
+  });
+
+  /* rendering */
+  function escapeHtml(s) { return s.replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function renderMarkdown(text) {
+    if (window.marked && window.DOMPurify) {
+      return DOMPurify.sanitize(marked.parse(text, { breaks: true }));
+    }
+    return "<p>" + escapeHtml(text).replace(/\n/g, "<br>") + "</p>";
+  }
+  function addCopyButtons(root) {
+    root.querySelectorAll("pre").forEach(function (pre) {
+      var wrap = document.createElement("div");
+      wrap.className = "codewrap";
+      pre.parentNode.insertBefore(wrap, pre);
+      wrap.appendChild(pre);
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "copy"; b.textContent = "Copy";
+      b.addEventListener("click", function () {
+        var done = function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500); };
+        if (navigator.clipboard) navigator.clipboard.writeText(pre.innerText).then(done); else done();
+      });
+      wrap.appendChild(b);
+    });
+  }
+  function addMessage(kind, text) {
+    $("empty") && $("empty").remove();
+    var row = document.createElement("div");
+    row.className = "msg " + kind;
+    var bubble = document.createElement("div");
+    bubble.className = "bubble";
+    if (kind === "user") bubble.textContent = text;
+    else if (kind === "err") bubble.textContent = text;
+    else { bubble.innerHTML = renderMarkdown(text); addCopyButtons(bubble); }
+    row.appendChild(bubble);
+    log.appendChild(row);
+    scroller.scrollTop = scroller.scrollHeight;
+    return row;
+  }
+  function showTyping() {
+    var row = document.createElement("div");
+    row.className = "msg bot";
+    row.innerHTML = '<div class="typing" aria-label="Assistant is typing"><i></i><i></i><i></i></div>';
+    log.appendChild(row);
+    scroller.scrollTop = scroller.scrollHeight;
+    return row;
+  }
+
+  /* response parsing: handles plain JSON and newline-delimited streaming JSON */
+  function extractReply(raw) {
+    var data;
+    try { data = JSON.parse(raw); } catch (e) { data = null; }
+    if (data !== null) {
+      if (Array.isArray(data)) data = data[0] || {};
+      var t = data.output || data.text || data.message || data.response;
+      if (typeof t === "string") return t;
+    }
+    var out = "";
+    raw.split("\n").forEach(function (line) {
+      line = line.trim();
+      if (!line) return;
+      try {
+        var o = JSON.parse(line);
+        if (o.type === "item" && typeof o.content === "string") out += o.content;
+      } catch (e) {}
+    });
+    return out || raw;
+  }
+
+  async function send(text) {
+    text = text.trim();
+    if (!text || busy) return;
+    var url = store(URL_KEY);
+    if (!url) { openDialog(); return; }
+    busy = true; sendBtn.disabled = true;
+    addMessage("user", text);
+    input.value = ""; autosize();
+    var typing = showTyping();
+    try {
+      var res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sendMessage", sessionId: sessionId, chatInput: text })
+      });
+      var raw = await res.text();
+      typing.remove();
+      if (!res.ok) {
+        var hint = res.status === 404
+          ? "n8n could not find that webhook. Publish the workflow and use the Production URL, not the Test URL."
+          : "n8n returned an error (" + res.status + "). Open the Executions tab in n8n to see what failed.";
+        addMessage("err", hint);
+      } else {
+        addMessage("bot", extractReply(raw));
+      }
+    } catch (e) {
+      typing.remove();
+      addMessage("err", "Could not reach n8n. Check that n8n is running, the URL is correct, and Allowed Origins (CORS) on the Chat Trigger is set to *.");
+    }
+    busy = false; sendBtn.disabled = false; input.focus();
+  }
+
+  /* input handling */
+  function autosize() { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 160) + "px"; }
+  input.addEventListener("input", autosize);
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input.value); }
+  });
+  sendBtn.addEventListener("click", function () { send(input.value); });
+  $("chips").addEventListener("click", function (e) {
+    if (e.target.classList.contains("chip")) send(e.target.textContent);
+  });
+
+  /* new chat */
+  $("newBtn").addEventListener("click", function () {
+    if (busy) return;
+    sessionId = newSession();
+    location.reload();
+  });
+
+  /* connection dialog */
+  function openDialog() { $("urlInput").value = store(URL_KEY) || ""; dlg.showModal(); $("urlInput").focus(); }
+  $("setBtn").addEventListener("click", openDialog);
+  $("cancelBtn").addEventListener("click", function () { dlg.close(); });
+  $("saveBtn").addEventListener("click", function () {
+    var v = $("urlInput").value.trim();
+    if (v) store(URL_KEY, v);
+    dlg.close();
+  });
+
+  if (!store(URL_KEY)) openDialog();
+})();
+</script>
+</body>
+</html>
