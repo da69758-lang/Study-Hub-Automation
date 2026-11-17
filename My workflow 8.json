@@ -1,0 +1,116 @@
+{
+  "name": "My workflow 8",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -544,
+        -16
+      ],
+      "id": "32f3f49a-4838-4a11-a20d-fb4ae396b8ac",
+      "name": "When chat message received",
+      "webhookId": "bb4daeec-e57b-4c21-ad63-a45e3ba280b8"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a friendly study assistant who explains things simply with examples."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -288,
+        -16
+      ],
+      "id": "3a3961a9-3e73-4064-b5da-8e1676c4edc2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -432,
+        192
+      ],
+      "id": "53c8cabe-08b9-40f6-8a57-8949307b6132",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "jT6HSX7I4zPpKgHI",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -288,
+        192
+      ],
+      "id": "6cc6e2d7-d620-47f2-ac90-7ec85a68c1bd",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d05ad916-8f7a-4160-aaa7-3b0566c55322",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "46c38d0665e1fce7aad28b1e5c5031194228d6f684edb9f574886d1219617fb3"
+  },
+  "nodeGroups": [],
+  "id": "IjEKNIsKDkvC9yYh",
+  "tags": []
+}
